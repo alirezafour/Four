@@ -32,9 +32,9 @@ void ChatClient::Connect(const std::string& ip, const std::string& port)
 		tcp::resolver::results_type endpoints = m_Resolver.resolve(ip, port);
 		boost::asio::connect(m_Socket, endpoints);
 	}
-
 	catch (const std::exception& e)
 	{
+		std::cout << "error form connect exception: \n";
 		if (m_CallbackErrorsFunction)
 		{
 			m_CallbackErrorsFunction(e.what());
@@ -49,15 +49,16 @@ awaitable<void> ChatClient::Do_Reading()
 	{
 		for (std::string read_msg;;)
 		{
-			std::size_t n = co_await boost::asio::async_read_until(m_Socket,
-				boost::asio::dynamic_buffer(read_msg, 1024), "\n", use_awaitable);
+				std::size_t n = co_await boost::asio::async_read_until(m_Socket,
+					boost::asio::dynamic_buffer(read_msg, 1024), "\n", use_awaitable);
 
-			OnMessage(read_msg);
-			read_msg.erase(0, n);
-		}
-	}
+				OnMessage(read_msg);
+				read_msg.erase(0, n);
+			}
+			}
 	catch (std::exception& e)
 	{
+		std::cout << "error form reading: \n";
 		if(m_CallbackErrorsFunction)
 		{
 			m_CallbackErrorsFunction(e.what());
@@ -84,6 +85,7 @@ void ChatClient::Do_Writing()
 
 void ChatClient::OnMessage(std::string message)
 {
+	std::cout << message << '\n';
 	if (m_CallbackMessageFunction) 
 	{
 		m_CallbackMessageFunction(message);
@@ -119,6 +121,7 @@ void ChatClient::Run()
 		[this] { return Do_Reading(); },
 		detached);
 	m_ThreadContext = std::thread([this]() { m_io_context.run(); });
+	m_ThreadContext.detach();
 }
 
 void ChatClient::Clear()

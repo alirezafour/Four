@@ -46,6 +46,7 @@ private:
 	 */
 	void Stop();
 
+private:
 	boost::asio::io_context m_io_context;
 	std::thread m_ThreadContext;
 	boost::asio::ip::tcp::resolver m_Resolver;
@@ -53,4 +54,5 @@ private:
 	std::function<void(std::string)> m_CallbackMessageFunction;
 	std::function<void(std::string_view)> m_CallbackErrorsFunction;
 	std::deque<std::string> m_OutMessages;
+	bool m_IsConnected = false;
 };

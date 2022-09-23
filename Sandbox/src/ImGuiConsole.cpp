@@ -1,11 +1,13 @@
 #include "ImGuiConsole.h"
-#include <sstream>
+#include <future>
 
 ImGuiConsole::ImGuiConsole()
 	: m_Client{}
 {
-	ConnectClient();
 	m_Client.SetCallbackErrorsFuntion(std::bind(&ImGuiConsole::OnClientError, this, std::placeholders::_1));
+
+	std::thread t1([this]() { ConnectClient(); });
+	t1.detach();
 
 	ClearLog();
 	memset(InputBuf, 0, sizeof(InputBuf));
@@ -20,7 +22,7 @@ ImGuiConsole::ImGuiConsole()
 	ScrollToBottom = false;
 
 	std::scoped_lock<std::mutex> lock(m_LogMutex);
-	AddLog("Welcome to Dear ImGui!");
+	AddLog("Welcome to my App!");
 }
 
 ImGuiConsole::~ImGuiConsole()
@@ -37,17 +39,31 @@ int ImGuiConsole::Stricmp(const char* s1, const char* s2)
 
 int ImGuiConsole::Strnicmp(const char* s1, const char* s2, int n)
 {
-	int d = 0; while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1) { s1++; s2++; n--; } return d;
+	int d = 0; 
+	while (n > 0 && (d = toupper(*s2) - toupper(*s1)) == 0 && *s1) 
+	{ 
+		s1++;
+		s2++;
+		n--; 
+	} 
+	return d;
 }
 
 char* ImGuiConsole::Strdup(const char* s)
 {
-	IM_ASSERT(s); size_t len = strlen(s) + 1; void* buf = malloc(len); IM_ASSERT(buf); return (char*)memcpy(buf, (const void*)s, len);
+	IM_ASSERT(s);
+	size_t len = strlen(s) + 1;
+	void* buf = malloc(len);
+	IM_ASSERT(buf);
+	return (char*)memcpy(buf, (const void*)s, len);
 }
 
 void ImGuiConsole::Strtrim(char* s)
 {
-	char* str_end = s + strlen(s); while (str_end > s && str_end[-1] == ' ') str_end--; *str_end = 0;
+	char* str_end = s + strlen(s); 
+	while (str_end > s && str_end[-1] == ' ') 
+		str_end--;
+	*str_end = 0;
 }
 
 void ImGuiConsole::ClearLog()
@@ -95,10 +111,10 @@ void ImGuiConsole::Draw(const char* title, bool* p_open)
 
 	// TODO: display items starting from the bottom
 
-	if (ImGui::SmallButton("Connect To Server"))
-	{ 
-		ConnectClient();
-	}
+// 	if (ImGui::SmallButton("Connect To Server"))
+// 	{ 
+// 		ConnectClient();
+// 	}
 	ImGui::SameLine();
 	if (ImGui::SmallButton("Clear")) { ClearLog(); }
 	ImGui::SameLine();
@@ -369,7 +385,8 @@ void ImGuiConsole::OnRecieveMessage(std::string message)
 void ImGuiConsole::OnClientError(std::string_view errorMessage)
 {
 	std::scoped_lock<std::mutex> lock(m_LogMutex);
-	AddLog("%s\n", errorMessage.data());
+	AddLog("[error] %s\n", errorMessage.data());
+	FOUR_LOG_CORE_ERROR("{0}", errorMessage.data());
 }
 
 void ImGuiConsole::ConnectClient()

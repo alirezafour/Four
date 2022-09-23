@@ -29,15 +29,6 @@ public:
 		bool p_open = true;
 		m_console.Draw("Console", &p_open);
 
-
-		ImGui::Begin("Hello");
-		ImGui::Text("Hello");
-		if (ImGui::Button("Click me!"))
-		{
-			ImGui::Text("Clicked!!!!!");
-		}
-		ImGui::End();
-
 		if (ImGui::BeginMenuBar())
 		{
 			if (ImGui::BeginMenu("Files"))
