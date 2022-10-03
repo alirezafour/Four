@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 include_directories("src")
 
-file(GLOB SOURCES server.cpp src/* src/*/* src/*/*)
+file(GLOB SOURCES main.cpp src/* src/*/* src/*/*)
 
 find_package(Boost)
 
