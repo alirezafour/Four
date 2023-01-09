@@ -18,9 +18,7 @@ jobs:
           name: "Say hello"
           command: |
             echo Running build
-            mkdir build
-            cd build
-            cmake ..
+            cmake .
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
